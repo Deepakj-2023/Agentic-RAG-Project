@@ -6,6 +6,11 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.136.0",
+    "langchain>=1.2.15",
+    "langchain-groq>=1.1.2",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "pydantic>=2.13.2",
     "python-dotenv>=1.2.2",
     "tavily-python>=0.7.23",
 ]
