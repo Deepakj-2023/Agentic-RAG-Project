@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+# Project files to ignore
+venv/
+utils/
+uv.lock
+test.py
+.python-version
+# Virtual environments
+.venv
+.env
