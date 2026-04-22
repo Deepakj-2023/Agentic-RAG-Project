@@ -1,0 +1,797 @@
+{
+  "meta": {
+    "datasets": [
+      {
+        "name": "IPL",
+        "type": "cricket",
+        "source": "IPL.csv → ipl_matches (SQLite)",
+        "description": "Ball-by-ball IPL data aggregated into match summaries",
+        "columns": [
+          "match_id",
+          "season",
+          "date",
+          "venue",
+          "winner",
+          "player_of_match"
+        ],
+        "seasons_available": [
+          "2007/08",
+          "2009",
+          "2009/10",
+          "2011",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020/21",
+          "2021",
+          "2022",
+          "2023",
+          "2024",
+          "2025",
+          "2026"
+        ]
+      },
+      {
+        "name": "PSL",
+        "type": "cricket",
+        "source": "PSL datasets → multiple SQLite tables",
+        "description": "Pakistan Super League batting, bowling, team, and timeline records",
+        "tables": [
+          "psl_team_results",
+          "psl_batting",
+          "psl_bowling",
+          "psl_highest_scores",
+          "psl_most_sixes",
+          "psl_sixes_innings",
+          "psl_best_bowling",
+          "psl_match_wins"
+        ]
+      },
+      {
+        "name": "FIFA",
+        "type": "football",
+        "source": "player_stats.csv → fifa_players (SQLite)",
+        "description": "FIFA player attributes and ratings",
+        "columns": [
+          "player",
+          "country",
+          "club",
+          "age",
+          "dribbling",
+          "finishing",
+          "sprint_speed",
+          "..."
+        ]
+      }
+    ]
+  },
+  "facts": {
+    "IPL 2007/08 champion": {
+      "answer": "Rajasthan Royals",
+      "player_of_match": "YK Pathan",
+      "final_date": "2008-06-01",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2009 champion": {
+      "answer": "Deccan Chargers",
+      "player_of_match": "A Kumble",
+      "final_date": "2009-05-24",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2009/10 champion": {
+      "answer": "Chennai Super Kings",
+      "player_of_match": "SK Raina",
+      "final_date": "2010-04-25",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2011 champion": {
+      "answer": "Chennai Super Kings",
+      "player_of_match": "M Vijay",
+      "final_date": "2011-05-28",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2012 champion": {
+      "answer": "Kolkata Knight Riders",
+      "player_of_match": "MS Bisla",
+      "final_date": "2012-05-27",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2013 champion": {
+      "answer": "Mumbai Indians",
+      "player_of_match": "KA Pollard",
+      "final_date": "2013-05-26",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2014 champion": {
+      "answer": "Kolkata Knight Riders",
+      "player_of_match": "MK Pandey",
+      "final_date": "2014-06-01",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2015 champion": {
+      "answer": "Mumbai Indians",
+      "player_of_match": "RG Sharma",
+      "final_date": "2015-05-24",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2016 champion": {
+      "answer": "Sunrisers Hyderabad",
+      "player_of_match": "BCJ Cutting",
+      "final_date": "2016-05-29",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2017 champion": {
+      "answer": "Mumbai Indians",
+      "player_of_match": "KH Pandya",
+      "final_date": "2017-05-21",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2018 champion": {
+      "answer": "Chennai Super Kings",
+      "player_of_match": "SR Watson",
+      "final_date": "2018-05-27",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2019 champion": {
+      "answer": "Mumbai Indians",
+      "player_of_match": "JJ Bumrah",
+      "final_date": "2019-05-12",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2020/21 champion": {
+      "answer": "Mumbai Indians",
+      "player_of_match": "TA Boult",
+      "final_date": "2020-11-10",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2021 champion": {
+      "answer": "Chennai Super Kings",
+      "player_of_match": "F du Plessis",
+      "final_date": "2021-10-15",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2022 champion": {
+      "answer": "Gujarat Titans",
+      "player_of_match": "HH Pandya",
+      "final_date": "2022-05-29",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2023 champion": {
+      "answer": "Chennai Super Kings",
+      "player_of_match": "DP Conway",
+      "final_date": "2023-05-29",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2024 champion": {
+      "answer": "Kolkata Knight Riders",
+      "player_of_match": "MA Starc",
+      "final_date": "2024-05-26",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2025 champion": {
+      "answer": "Royal Challengers Bengaluru",
+      "player_of_match": "KH Pandya",
+      "final_date": "2025-06-03",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2026 champion": {
+      "answer": "Punjab Kings",
+      "player_of_match": "Arshdeep Singh",
+      "final_date": "2026-04-16",
+      "source": "ipl_matches (last match of season)"
+    },
+    "IPL 2007/08 most match wins": {
+      "answer": "Rajasthan Royals",
+      "all_teams": [
+        {
+          "team": "Rajasthan Royals",
+          "wins": 13
+        },
+        {
+          "team": "Kings XI Punjab",
+          "wins": 10
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 9
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 7
+        },
+        {
+          "team": "Delhi Daredevils",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2009 most match wins": {
+      "answer": "Delhi Daredevils",
+      "all_teams": [
+        {
+          "team": "Delhi Daredevils",
+          "wins": 10
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 9
+        },
+        {
+          "team": "Deccan Chargers",
+          "wins": 9
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 8
+        },
+        {
+          "team": "Kings XI Punjab",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2009/10 most match wins": {
+      "answer": "Mumbai Indians",
+      "all_teams": [
+        {
+          "team": "Mumbai Indians",
+          "wins": 11
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 9
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 8
+        },
+        {
+          "team": "Deccan Chargers",
+          "wins": 8
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2011 most match wins": {
+      "answer": "Chennai Super Kings",
+      "all_teams": [
+        {
+          "team": "Chennai Super Kings",
+          "wins": 11
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 10
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 10
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 8
+        },
+        {
+          "team": "Kings XI Punjab",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2012 most match wins": {
+      "answer": "Kolkata Knight Riders",
+      "all_teams": [
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 12
+        },
+        {
+          "team": "Delhi Daredevils",
+          "wins": 11
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 10
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 10
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 8
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2013 most match wins": {
+      "answer": "Mumbai Indians",
+      "all_teams": [
+        {
+          "team": "Mumbai Indians",
+          "wins": 13
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 12
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 11
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 9
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 8
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2014 most match wins": {
+      "answer": "Kings XI Punjab",
+      "all_teams": [
+        {
+          "team": "Kings XI Punjab",
+          "wins": 12
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 11
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 10
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 7
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 6
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2015 most match wins": {
+      "answer": "Mumbai Indians",
+      "all_teams": [
+        {
+          "team": "Mumbai Indians",
+          "wins": 10
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 10
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 8
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 7
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2016 most match wins": {
+      "answer": "Sunrisers Hyderabad",
+      "all_teams": [
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 11
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 9
+        },
+        {
+          "team": "Gujarat Lions",
+          "wins": 9
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 8
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2017 most match wins": {
+      "answer": "Mumbai Indians",
+      "all_teams": [
+        {
+          "team": "Mumbai Indians",
+          "wins": 11
+        },
+        {
+          "team": "Rising Pune Supergiant",
+          "wins": 10
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 9
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 8
+        },
+        {
+          "team": "Kings XI Punjab",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2018 most match wins": {
+      "answer": "Chennai Super Kings",
+      "all_teams": [
+        {
+          "team": "Chennai Super Kings",
+          "wins": 11
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 10
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 9
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 7
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 6
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2019 most match wins": {
+      "answer": "Mumbai Indians",
+      "all_teams": [
+        {
+          "team": "Mumbai Indians",
+          "wins": 10
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 10
+        },
+        {
+          "team": "Delhi Capitals",
+          "wins": 9
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 6
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 6
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2020/21 most match wins": {
+      "answer": "Mumbai Indians",
+      "all_teams": [
+        {
+          "team": "Mumbai Indians",
+          "wins": 11
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 8
+        },
+        {
+          "team": "Delhi Capitals",
+          "wins": 8
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 6
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 6
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2021 most match wins": {
+      "answer": "Chennai Super Kings",
+      "all_teams": [
+        {
+          "team": "Chennai Super Kings",
+          "wins": 11
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 9
+        },
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 9
+        },
+        {
+          "team": "Delhi Capitals",
+          "wins": 9
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2022 most match wins": {
+      "answer": "Gujarat Titans",
+      "all_teams": [
+        {
+          "team": "Gujarat Titans",
+          "wins": 12
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 10
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 9
+        },
+        {
+          "team": "Lucknow Super Giants",
+          "wins": 9
+        },
+        {
+          "team": "Punjab Kings",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2023 most match wins": {
+      "answer": "Gujarat Titans",
+      "all_teams": [
+        {
+          "team": "Gujarat Titans",
+          "wins": 11
+        },
+        {
+          "team": "Chennai Super Kings",
+          "wins": 10
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 9
+        },
+        {
+          "team": "Lucknow Super Giants",
+          "wins": 8
+        },
+        {
+          "team": "Royal Challengers Bangalore",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2024 most match wins": {
+      "answer": "Kolkata Knight Riders",
+      "all_teams": [
+        {
+          "team": "Kolkata Knight Riders",
+          "wins": 11
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 9
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 9
+        },
+        {
+          "team": "Royal Challengers Bengaluru",
+          "wins": 7
+        },
+        {
+          "team": "Lucknow Super Giants",
+          "wins": 7
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2025 most match wins": {
+      "answer": "Royal Challengers Bengaluru",
+      "all_teams": [
+        {
+          "team": "Royal Challengers Bengaluru",
+          "wins": 11
+        },
+        {
+          "team": "Punjab Kings",
+          "wins": 10
+        },
+        {
+          "team": "Mumbai Indians",
+          "wins": 9
+        },
+        {
+          "team": "Gujarat Titans",
+          "wins": 9
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 6
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "IPL 2026 most match wins": {
+      "answer": "Royal Challengers Bengaluru",
+      "all_teams": [
+        {
+          "team": "Royal Challengers Bengaluru",
+          "wins": 4
+        },
+        {
+          "team": "Rajasthan Royals",
+          "wins": 4
+        },
+        {
+          "team": "Punjab Kings",
+          "wins": 4
+        },
+        {
+          "team": "Sunrisers Hyderabad",
+          "wins": 2
+        },
+        {
+          "team": "Lucknow Super Giants",
+          "wins": 2
+        }
+      ],
+      "source": "ipl_matches"
+    },
+    "PSL all-time most wins": {
+      "answer": "Islamabad United",
+      "top_teams": [
+        {
+          "team": "Islamabad United",
+          "won": 55,
+          "lost": 44
+        },
+        {
+          "team": "Peshawar Zalmi",
+          "won": 55,
+          "lost": 47
+        },
+        {
+          "team": "Multan Sultans",
+          "won": 45,
+          "lost": 31
+        },
+        {
+          "team": "Quetta Gladiators",
+          "won": 44,
+          "lost": 47
+        },
+        {
+          "team": "Lahore Qalandars",
+          "won": 40,
+          "lost": 51
+        },
+        {
+          "team": "Karachi Kings",
+          "won": 36,
+          "lost": 55
+        }
+      ],
+      "source": "psl_team_results"
+    }
+  },
+  "records": {
+    "PSL all-time top run scorers": [
+      {
+        "player": "Babar Azam (IU/KK/PZ)",
+        "runs": 3504
+      },
+      {
+        "player": "Fakhar Zaman (LQ)",
+        "runs": 2525
+      },
+      {
+        "player": "Mohammad Rizwan (KK/LQ/MS)",
+        "runs": 2403
+      },
+      {
+        "player": "Shoaib Malik (KK/MS/PZ)",
+        "runs": 2336
+      },
+      {
+        "player": "RR Rossouw (MS/QG)",
+        "runs": 2015
+      }
+    ],
+    "PSL all-time top wicket takers": [
+      {
+        "player": "Wahab Riaz (PZ)",
+        "wickets": 113
+      },
+      {
+        "player": "Hasan Ali (IU/KK/PZ)",
+        "wickets": 108
+      },
+      {
+        "player": "Shaheen Shah Afridi (LQ)",
+        "wickets": 103
+      },
+      {
+        "player": "Shadab Khan (IU)",
+        "wickets": 91
+      },
+      {
+        "player": "Faheem Ashraf (IU)",
+        "wickets": 78
+      }
+    ],
+    "FIFA top dribblers": [
+      {
+        "player": "Lionel Messi",
+        "country": "Argentina",
+        "club": "Paris SG ",
+        "dribbling": 95
+      },
+      {
+        "player": "Neymar Jr",
+        "country": "Brazil",
+        "club": "Paris SG",
+        "dribbling": 95
+      },
+      {
+        "player": "Kylian MbappÃ©",
+        "country": "France",
+        "club": "Paris SG ",
+        "dribbling": 93
+      },
+      {
+        "player": "Kylian Mbappé",
+        "country": "France",
+        "club": "Paris SG",
+        "dribbling": 93
+      },
+      {
+        "player": "Marco Verratti",
+        "country": "Italy",
+        "club": "Paris SG ",
+        "dribbling": 91
+      }
+    ]
+  }
+}

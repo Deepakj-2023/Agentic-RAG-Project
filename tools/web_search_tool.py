@@ -16,14 +16,14 @@ def web_search(query: str):
         query (str): short search query
 
     Output:
-        dict: top 3 results with snippet, url, date
+        dict: top 5 results with snippet, url, date
     """
 
     try:
         response = client.search(
             query=query,
             search_depth="basic",   # fast + cheap
-            max_results=3
+            max_results=5
         )
 
         results = []
@@ -35,6 +35,9 @@ def web_search(query: str):
                 "url": item.get("url"),
                 "published_date": item.get("published_date")
             })
+
+        if not results:
+            return {"query": query, "message": "No relevant web results found. Try search_docs for historical data."}
 
         return {
             "query": query,

@@ -1,7 +1,7 @@
 from tools.web_search_tool import web_search
 
 if __name__ == "__main__":
-    query = "Infosys stock price 2026"
+    query = "Complete each match schedule and stats in FIFA World Cup 2022"
 
     result = web_search(query)
 

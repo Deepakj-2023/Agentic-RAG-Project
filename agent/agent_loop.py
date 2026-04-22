@@ -1,68 +1,94 @@
-# agent_loop.py : Main loop for the agent, orchestrating LLM decisions and tool executions
+# agent_loop.py : Multi-role agent loop (Planner -> Executor -> Synthesizer -> Evaluator)
 
-from context import Context
-from llm_brain import call_llm
+import json
+from agent.context import Context
+from agent.llm_brain import plan_action, synthesize_answer, evaluate_answer, ToolCall
+from agent.fusion import fuse_results, format_fused_for_llm
+from utils.knowledge_graph import load_knowledge_graph, lookup_fact
 
-# import your tools
+# Import tools
 from tools.web_search_tool import web_search
 from tools.search_doc_tool import search_docs
 from tools.query_tool import query_data
 
 MAX_STEPS = 8
 
+# Load knowledge graph once at module level
+_kg = load_knowledge_graph()
 
 def run_agent(question: str):
+    print(f"\n>>> Starting Agent for Question: {question}")
     context = Context()
     trace = []
+    
+    # Phase 0: Knowledge Graph
+    kg_result = lookup_fact(_kg, question)
+    if kg_result:
+        trace.append({"step": 0, "tool": "knowledge_graph", "output": kg_result})
+        context.add({"step": 0, "tool": "knowledge_graph", "input": question, "output": kg_result})
+
+    last_feedback = ""
 
     for step in range(MAX_STEPS):
+        step_num = step + 1
+        print(f"\n--- Step {step_num} / {MAX_STEPS} ---")
 
-        print(f"\n--- Step {step+1} ---")
+        # [PLAN] Planner decides next steps
+        full_context = str(context)
+        if last_feedback:
+            full_context += f"\n\n--- EVALUATOR FEEDBACK FROM PREVIOUS STEP ---\n{last_feedback}"
+            
+        decision = plan_action(question, full_context)
+        print(f"[PLAN] Action: {decision.action} | Reason: {decision.reason}")
 
-        decision = call_llm(question, str(context))
+        if decision.action == "chat":
+            # Handle simple chat/greetings
+            answer = synthesize_answer(question, "User is just chatting or saying hello.")
+            return {"answer": answer, "trace": trace, "steps_used": step_num}
 
-        action = decision.action
-        tool_input = decision.input
+        # [ACT] Execute tool(s)
+        tool_results = []
+        for t in decision.tools:
+            if not t.name or t.name == "chat": continue
+            print(f"[ACT] Running {t.name}: {t.input}")
+            try:
+                if t.name == "web_search": result = web_search(t.input)
+                elif t.name == "search_docs": result = search_docs(t.input)
+                elif t.name == "query_data": result = query_data(t.query_type or "sql", t.input, t.csv_name)
+                else: result = {"error": f"Unknown tool: {t.name}"}
+            except Exception as e:
+                result = {"error": str(e)}
+            
+            res_entry = {"step": step_num, "tool": t.name, "input": t.input, "output": result}
+            trace.append(res_entry)
+            context.add(res_entry)
+            tool_results.append(result)
 
-        print(f"Decision: {action}")
-        print(f"Input: {tool_input}")
+        # [FUSE & SYNTHESIZE]
+        fused = fuse_results(trace, question)
+        fused_text = format_fused_for_llm(fused)
+        current_answer = synthesize_answer(question, fused_text)
+        print(f"[SYNTHESIZE] Current Answer: {current_answer[:100]}...")
 
-        if action == "final":
+        # [EVALUATE]
+        evaluation = evaluate_answer(question, current_answer, fused_text)
+        print(f"[EVALUATE] Sufficient: {evaluation.sufficient}")
+        if evaluation.feedback:
+            print(f"[EVALUATE] Feedback: {evaluation.feedback}")
+        if evaluation.correction:
+            print(f"[EVALUATE] Correction: {evaluation.correction}")
+
+        if evaluation.sufficient or step_num == MAX_STEPS:
             return {
-                "answer": tool_input,
-                "trace": trace
+                "answer": current_answer,
+                "trace": trace,
+                "steps_used": step_num
             }
-
-        #  Tool Execution Logic
-        if action == "web_search":
-            result = web_search(tool_input)
-
-        elif action == "search_docs":
-            result = search_docs(tool_input)
-
-        elif action == "query_data":
-            result = query_data(tool_input)
-
-        else:
-            return {
-                "answer": "Invalid tool selected",
-                "trace": trace
-            }
-
-        print(f"Result: {result}")
-
-        #  Update in context
-        step_data = {
-            "step": step + 1,
-            "tool": action,
-            "input": tool_input,
-            "output": result
-        }
-
-        context.add(step_data)
-        trace.append(step_data)
-
+        
+        last_feedback = f"Feedback: {evaluation.feedback}\nCorrection: {evaluation.correction}"
+        
     return {
-        "answer": "I cannot answer within 8 steps",
-        "trace": trace
-    } 
+        "answer": "Failed to find a sufficient answer within max steps.",
+        "trace": trace,
+        "steps_used": MAX_STEPS
+    }

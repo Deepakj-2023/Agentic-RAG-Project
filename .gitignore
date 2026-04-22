@@ -7,7 +7,7 @@ wheels/
 *.egg-info
 # Project files to ignore
 venv/
-utils/
+D:\AgenticRAG\Proadapt-Project\utils\config.py
 uv.lock
 test.py
 .python-version
