@@ -5,6 +5,11 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 from agent import agent_loop
 
+# Fix encoding for Windows console
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 def main():
     print("="*60)
     print("Welcome to the Multi-Tournament Sports Analysis Agent!")

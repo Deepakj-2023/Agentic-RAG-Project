@@ -1,35 +1,113 @@
 import pandas as pd
 import sqlite3
 import os
+import json
+from langchain_core.messages import SystemMessage, HumanMessage
+from agent.llm_brain import llm, load_compact_schema
 
 # Cache for dataframes
 _dataframes = {}
 
+# ────────────────────────────────────────────────────────────
+# SMART CODE GENERATOR
+# ────────────────────────────────────────────────────────────
+
+QUERY_GEN_PROMPT = """
+You are a Data Scientist specialized in Sports Analytics.
+Your task is to translate a natural language "intent" into executable code ({query_type}).
+
+DATASETS AVAILABLE:
+{schema}
+
+RULES:
+1. If query_type is "sql", output ONLY a valid SQLite SELECT statement.
+   - ⚠️ IMPORTANT: Always use double quotes for column names that start with numbers or contain special characters (e.g., "4s", "6s", "Match Date").
+2. If query_type is "pandas", output ONLY a valid Python expression using a dataframe named 'df'.
+   - You can use sorting, grouping, and aggregations.
+   - Example: df.sort_values('runs_batter', ascending=False).head(5)
+   - Example: df[df['batter'] == 'Virat Kohli']
+3. ALWAYS use double quotes for column names that start with numbers or contain spaces.
+   - ✅ Correct: SELECT "Player", "Runs", "4s", "6s", "Match Date" FROM psl_highest_individual_score
+   - ❌ Incorrect: SELECT Player, Runs, 4s, 6s, Match Date FROM psl_highest_individual_score
+4. DO NOT include markdown formatting or explanations.
+
+Output only the raw code string.
+"""
+
+def _generate_query_code(intent: str, query_type: str) -> str:
+    schema = load_compact_schema()
+    
+    prompt = QUERY_GEN_PROMPT.format(
+        query_type=query_type,
+        schema=schema
+    )
+    
+    messages = [
+        SystemMessage(content=prompt),
+        HumanMessage(content=f"Intent: {intent}")
+    ]
+    
+    response = llm.invoke(messages)
+    code = response.content.strip()
+    # Clean up common LLM artifacts
+    code = code.replace("```sql", "").replace("```python", "").replace("```", "").strip()
+    if code.lower().startswith("query_type:"):
+        code = code.split("\n", 1)[-1].strip()
+    return code
+
+# ────────────────────────────────────────────────────────────
+# EXECUTORS
+# ────────────────────────────────────────────────────────────
+
 def _query_pandas(csv_name: str, query: str):
-    file_path = f"data/{csv_name}"
+    file_path = f"data/structure_data/{csv_name}"
     if not os.path.exists(file_path):
-        return {"error": f"CSV file {csv_name} not found in data/ folder."}
+        file_path = f"data/{csv_name}"
+        if not os.path.exists(file_path):
+            return {"error": f"CSV file {csv_name} not found."}
     
     try:
         if csv_name not in _dataframes:
-            print(f"Loading {csv_name} into memory...")
-            _dataframes[csv_name] = pd.read_csv(file_path, low_memory=False,encoding="latin1")
+            print(f"[LOAD] {csv_name}...")
+            _dataframes[csv_name] = pd.read_csv(file_path, low_memory=False, encoding="latin1")
         
         df = _dataframes[csv_name]
-        try:
-            result = df.query(query)
-        except Exception as e:
-            cols = list(df.columns)
-            return {"error": f"Pandas query failed: {e}. Available columns are: {cols}"}
         
-        if len(result) == 0:
-            return {"source": csv_name, "message": "No results found. Try a broader query or different tool.", "row_count": 0}
+        # Use eval to allow more complex pandas expressions
+        try:
+            # We provide 'df' and 'pd' in the local context for eval
+            result = eval(query, {"df": df, "pd": pd})
+        except Exception as e:
+            # Fallback to df.query if it's just a filter string
+            try:
+                result = df.query(query)
+            except:
+                cols = list(df.columns)
+                return {"error": f"Pandas execution failed: {e}. Columns: {cols[:15]}"}
+        
+        if result is None or (isinstance(result, pd.DataFrame) and len(result) == 0):
+            return {"source": csv_name, "message": "No results found.", "row_count": 0, "query_used": query}
+
+        # Convert result to a format suitable for JSON
+        if isinstance(result, pd.DataFrame):
+            output_rows = result.head(5).values.tolist()
+            output_cols = list(result.columns)
+            row_count = len(result)
+        elif isinstance(result, pd.Series):
+            output_rows = [result.head(5).tolist()]
+            output_cols = [result.name or "value"]
+            row_count = len(result)
+        else:
+            output_rows = [[str(result)]]
+            output_cols = ["result"]
+            row_count = 1
 
         return {
             "source": csv_name,
-            "columns": list(result.columns),
-            "rows": result.head(5).values.tolist(),
-            "row_count": len(result)
+            "columns": output_cols,
+            "rows": output_rows,
+            "row_count": row_count,
+            "query_used": query
         }
     except Exception as e:
         return {"error": str(e)}
@@ -37,7 +115,7 @@ def _query_pandas(csv_name: str, query: str):
 def _query_sql(sql_query: str):
     db_path = "data/sports_data.db"
     if not os.path.exists(db_path):
-        return {"error": "SQLite database not found. Run scripts/setup_data.py first."}
+        return {"error": "SQLite database not found."}
     
     try:
         conn = sqlite3.connect(db_path)
@@ -49,31 +127,42 @@ def _query_sql(sql_query: str):
         conn.close()
         
         if len(rows) == 0:
-            return {"source": "SQLite DB", "message": "No results found in the database. Try search_docs or web_search.", "row_count": 0}
+            return {"source": "SQLite DB", "message": "No results found.", "row_count": 0, "query_used": sql_query}
 
         return {
             "source": "SQLite DB",
             "columns": columns,
             "rows": rows[:5],
-            "row_count": len(rows)
+            "row_count": len(rows),
+            "query_used": sql_query
         }
     except Exception as e:
         return {"error": str(e)}
 
-def query_data(query_type: str, query_input: str, csv_name: str = None):
+# ────────────────────────────────────────────────────────────
+# MAIN TOOL ENTRY
+# ────────────────────────────────────────────────────────────
+
+def query_data(query_type: str, intent: str, csv_name: str = None):
     """
-    Unified query tool for structured data.
+    Smart query tool that translates intent to code then executes.
+    """
+    print(f"[SMART-TOOL] Translating intent: {intent}")
     
-    Args:
-        query_type (str): 'sql' or 'pandas'
-        query_input (str): The SQL query string or Pandas query string.
-        csv_name (str, optional): The name of the CSV file if query_type is 'pandas'.
-    """
-    if query_type == "sql":
-        return _query_sql(query_input)
-    elif query_type == "pandas":
-        if not csv_name:
-            return {"error": "csv_name is required for pandas queries."}
-        return _query_pandas(csv_name, query_input)
-    else:
-        return {"error": f"Invalid query_type: {query_type}. Use 'sql' or 'pandas'."}
+    try:
+        # 1. Generate code from intent
+        generated_code = _generate_query_code(intent, query_type)
+        print(f"[SMART-TOOL] Generated {query_type}: {generated_code}")
+        
+        # 2. Execute
+        if query_type == "sql":
+            return _query_sql(generated_code)
+        elif query_type == "pandas":
+            if not csv_name:
+                return {"error": "csv_name is required for pandas queries."}
+            return _query_pandas(csv_name, generated_code)
+        else:
+            return {"error": f"Invalid query_type: {query_type}"}
+            
+    except Exception as e:
+        return {"error": f"Smart Tool Error: {str(e)}"}

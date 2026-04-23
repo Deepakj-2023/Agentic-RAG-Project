@@ -49,8 +49,7 @@ def setup_pandas():
         SCHEMA_REGISTRY[name] = {
             "type": "pandas",
             "path": path,
-            "columns": {col: str(dtype) for col, dtype in df.dtypes.items()},
-            "sample": df.head(3).to_dict(orient="records")
+            "columns": {col: str(dtype) for col, dtype in df.dtypes.items()}
         }
 
         print(f"[PANDAS] Registered '{name}' with {len(df.columns)} columns.")
