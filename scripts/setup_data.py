@@ -44,7 +44,7 @@ def setup_pandas():
             print(f"[PANDAS] Missing: {path}")
             continue
 
-        df = pd.read_csv(path, nrows=50, low_memory=False)
+        df = pd.read_csv(path, nrows=50, low_memory=False,encoding="latin1")
 
         SCHEMA_REGISTRY[name] = {
             "type": "pandas",
@@ -103,7 +103,7 @@ def setup_sqlite():
             continue
 
         try:
-            df = pd.read_csv(file_path, low_memory=False)
+            df = pd.read_csv(file_path, low_memory=False,encoding="latin1")
             table_name = clean_table_name(file_path)
 
             df.to_sql(table_name, conn, if_exists="replace", index=False)

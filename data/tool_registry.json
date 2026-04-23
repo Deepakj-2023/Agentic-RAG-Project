@@ -1,0 +1,25 @@
+{
+  "query_data": {
+    "description": "Query structured sports data from SQL or CSV",
+    "input_format": {
+      "query_type": "sql | pandas",
+      "query": "string",
+      "csv_name": "optiona(if pandas means  csv_name is must)"
+    },
+    "best_for": ["IPL stats", "PSL stats", "historical match data", "player performance"]
+  },
+  "search_docs": {
+    "description": "Search local vector store (match reports, summaries)",
+    "input_format": {
+      "query": "string"
+    },
+    "best_for": ["match analysis", "detailed reports", "semi-structured insights"]
+  },
+  "web_search": {
+    "description": "Search live web data",
+    "input_format": {
+      "query": "string"
+    },
+    "best_for": ["latest news", "real-time info", "unknown facts"]
+  }
+}

@@ -13,7 +13,7 @@ def _query_pandas(csv_name: str, query: str):
     try:
         if csv_name not in _dataframes:
             print(f"Loading {csv_name} into memory...")
-            _dataframes[csv_name] = pd.read_csv(file_path, low_memory=False)
+            _dataframes[csv_name] = pd.read_csv(file_path, low_memory=False,encoding="latin1")
         
         df = _dataframes[csv_name]
         try:
