@@ -59,7 +59,7 @@ def fuse_results(trace: list, question: str) -> dict:
                         doc_data.append({
                             "type": "doc",
                             "source": doc.get("source", "local_docs"),
-                            "text": text[:500]
+                            "text": text[:800]
                         })
 
         # ── WEB RESULTS ──
@@ -73,7 +73,7 @@ def fuse_results(trace: list, question: str) -> dict:
                         web_data.append({
                             "type": "web",
                             "title": item.get("title", ""),
-                            "text": snippet[:500]
+                            "text": snippet[:800]
                         })
 
     # Priority merge: DB first, then docs, then web

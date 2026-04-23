@@ -85,48 +85,64 @@ def _get_psl_table_names():
 
 PLANNER_PROMPT = """
     You are a reasoning-based Sports Analytics Planner.
+
 Your job is to create a step-by-step plan to answer the user's question.
 For each step, you will select the appropriate tool and provide a clear "intent" for that tool.
+
 AVAILABLE DATASETS (High Level):
 1. IPL (Structured): Player stats, ball-by-ball, match results. (Pandas: "IPL.csv")
 2. PSL (Structured): Highest scores, most runs, wickets, team results. (SQL: "psl_db")
 3. FIFA (Structured): Player attributes, skills, club info. (Pandas: "player_stats.csv")
 4. Sports Docs (Unstructured): Biographical info, descriptions, context.
 5. Web (Live/Latest): Latest news, missing data from local sources.
+
 ---
+
 TOOLS PURPOSE:
+
 - query_data:
   Use for structured stats (runs, wickets, scores, rankings).
   You must provide:
   1. "input": A natural language "intent" (e.g., "Find most runs in PSL history").
   2. "query_type": "sql" or "pandas".
   3. "csv_name": Use "IPL.csv" or "player_stats.csv" if query_type is pandas.
+
 - search_docs:
-  Use for descriptions, explanations, player info, or "Who is X?" questions.
+  Use for descriptions, player info, or "Who is X?" questions.
   "input": The search query.
+
 - web_search:
   Use for live info or when other tools fail.
   "input": The search query.
+
 ---
+
 IMPORTANT RULES:
 - You are a PLANNER. Break down complex questions.
-- If a question is about a person ("Who is Kohli?"), ALWAYS start with search_docs or web_search to identify them first.
-- If the tool result is "No results", pivot to a different tool (e.g., from DB to Web).
-- DO NOT generate code. The tools generate their own code internally.
+- **MULTIPLE TOOLS (PARALLEL)**: You can and SHOULD use MULTIPLE tools in the same step for complex questions. (e.g., Step 1: `query_data` for stats + `search_docs` for style).
+- **MANDATORY CROSS-VERIFICATION**: For any question asking for a record, extreme value, or fact (e.g., "Highest score", "Most wickets", "Champion of X"), you **MUST** use BOTH `query_data` and `web_search`. Never trust only one source for a record.
+- **COMPARISON RULE**: For questions like "Compare top scorers in IPL vs PSL", identify the top scorer for EACH league separately (e.g., Step 1: IPL, Step 2: PSL) then fuse results.
+- **INTENT RULE**: In the `input` field for `query_data`, provide **ONLY** a natural language description (e.g., "Top run scorer in IPL"). 
+- **DO NOT** suggest column names, SQL syntax, or file paths in the intent.
+- **VAGUE IDENTITIES**: If a person is vague ("Who is Kohli?"), start with `search_docs` or `web_search`.
+- **PIVOT**: If a tool returns "No results" or suspicious data (e.g., a "highest score" that seems low), pivot to a different tool.
+- **ERROR RECOVERY**: If a tool returns an error, analyze it and describe the fix in natural language in the next step.
 
 FEW-SHOT EXAMPLES:
+
 Q: Who is Virat?
 {
-  "thought": "I need to find biographical info and then check for stats.",
+  "thought": "I need to identify Virat first to get his full name, then check his stats.",
   "action": "tool_use",
   "tools": [
     {"name": "search_docs", "input": "Biographical information about Virat Kohli"},
     {"name": "query_data", "input": "Find career IPL stats for Virat Kohli", "query_type": "pandas", "csv_name": "IPL.csv"}
   ]
 }
+
 Q: Compare PSL vs IPL top scorers
 {
-  "thought": "I need to get the top run scorers from both PSL (SQL) and IPL (Pandas).",
+  "thought": "I need to find the specific top run scorer for PSL and then the top run scorer for IPL to compare them.",
   "action": "tool_use",
   "tools": [
     {"name": "query_data", "input": "Find the player with the most runs in PSL history", "query_type": "sql"},
@@ -166,21 +182,23 @@ Sources: [sources used]
 # ────────────────────────────────────────
 
 EVALUATOR_PROMPT = """
-You are an evaluator checking if an answer is correct based on evidence.
+You are a high-level Evaluator checking if an Answer correctly reflects the Evidence.
 
 Rules:
-1. The "RAW TOOL OUTPUTS" are the ground truth. Accept variations like "145" vs "145*" if they refer to the same value.
-2. "Sufficient" = The answer is grounded in tool evidence. If the tool result confirms the answer (e.g. Jason Roy 145), mark as sufficient.
-3. "Correction" = Only suggest a correction if the data is actually missing or clearly wrong. 
-4. DO NOT loop infinitely if the answer is already correct. If the answer is correct but the "source" name is slightly different, mark as sufficient.
-5. If the agent finds the answer via web_search because query_data failed, that is ACCEPTABLE.
+1. **TRUTH SOURCE**: The "Evidence" (tool outputs) is the ground truth.
+2. **FLEXIBILITY**: If the Tool says "Babar Azam: 2935 runs" and the Answer says "Babar Azam scored 2,935 runs", mark as **Sufficient: True**. Do not fail for commas, units, or minor wording.
+3. **PUNCTUATION**: Ignore characters like '*' in numbers (e.g., "145*" vs "145") if they represent the same value.
+4. **CORRECTNESS**: If the Answer accurately summarizes the data found in Step 1 or Step 2, it is SUFFICIENT. 
+5. **LOOP PREVENTION**: If the answer is correct but the agent is trying to "fix" a tiny formatting detail, mark as **Sufficient: True** to stop the loop.
+6. **STRENGTH & ROBUSTNESS**: For complex questions or major records (e.g., "highest", "most", "stats + style"), a "Sufficient" answer **MUST** incorporate evidence from multiple sources (e.g. DB + Web). If the agent only used one tool for a major record, mark as **Sufficient: False** and ask for verification.
+7. **CORRECTION FIELD**: If you must fail (Sufficient: False), provide a specific correction like: "The answer only uses DB. Verify with web_search to ensure accuracy."
 
 JSON Schema:
 {
   "sufficient": true/false,
   "feedback": "Why it is sufficient or not",
-  "correction": "Fix suggestion (if any)",
-  "output": "Final answer"
+  "correction": "Guidance for the next planning step",
+  "output": "The final refined answer"
 }
 """
 
