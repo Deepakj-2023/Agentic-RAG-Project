@@ -15,7 +15,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 from agent.agent_loop import run_agent
 
 # ═══════════════════════════════════════════════════════════════
-# EVALUATION SET: 22 Questions
+# EVALUATION SET: 20 Questions
 # ═══════════════════════════════════════════════════════════════
 
 EVAL_SET = [

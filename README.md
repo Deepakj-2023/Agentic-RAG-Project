@@ -473,3 +473,9 @@ The agent was tested on **22 questions** across 4 categories:
 | Data Validation | Pydantic v2 | Typed models for Planner/Evaluator outputs |
 | Environment | python-dotenv | API key management |
 | Package Manager | uv / pip | `pyproject.toml` based |
+
+---
+
+## 🎬 Video Demo
+
+▶️ [Watch the project demo on Google Drive](https://drive.google.com/file/d/1A0_JfOCwWcfzzEg-rbai0xlbVcgdcLIs/view?usp=drive_link)
